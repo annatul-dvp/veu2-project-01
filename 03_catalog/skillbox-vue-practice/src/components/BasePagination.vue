@@ -40,8 +40,6 @@ export default {
   },
   methods: {
     paginate(page) {
-      console.log(page);
-      console.log(this.$emit('paginate', page));
       this.$emit('paginate', page);
     },
   },
