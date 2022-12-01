@@ -1,7 +1,8 @@
 <template>
   <section class="catalog">
     <ProductList :products="products"/>
-    <BasePagination v-model="page" :count="countProducts" :per-page="productPerPage"/>
+    <BasePagination v-model:page="page" :count="countProducts"
+    :per-page="productPerPage"/>
   </section>
 </template>
 
@@ -28,5 +29,11 @@ export default {
       return products.length;
     },
   },
+  // methods: {
+  //   setPage(page) {
+  //     console.log(page);
+  //     this.page = page;
+  //   },
+  // },
 };
 </script>
