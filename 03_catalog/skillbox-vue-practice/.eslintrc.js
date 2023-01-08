@@ -20,5 +20,7 @@ module.exports = {
         some: ['nesting', 'id'],
       },
     }],
+    'linebreak-style': [2, 'windows'],
+    'max-len': ['error', 110],
   },
 };
