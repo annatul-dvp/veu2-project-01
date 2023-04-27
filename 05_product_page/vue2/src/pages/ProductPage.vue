@@ -33,7 +33,7 @@
           {{ product.title }}
         </h2>
         <div class="item__form">
-          <form class="form" action="#" method="POST">
+          <form class="form" action="#" method="POST" @submit.prevent="addToCart">
             <b class="item__price">
               {{ product.price | numberFormat }}
             </b>
@@ -96,23 +96,7 @@
             </fieldset>
 
             <div class="item__row">
-              <div class="form__counter">
-                <button type="button" aria-label="Убрать один товар">
-                  <svg width="12" height="12" fill="currentColor">
-                    <use xlink:href="#icon-minus"></use>
-                  </svg>
-                </button>
-
-                <label>
-                  <input type="text" value="1" name="count">
-                </label>
-
-                <button type="button" aria-label="Добавить один товар">
-                  <svg width="12" height="12" fill="currentColor">
-                    <use xlink:href="#icon-plus"></use>
-                  </svg>
-                </button>
-              </div>
+              <CounterProduct :product-amount.sync="productAmount"> </CounterProduct>
 
               <button class="button button--primery" type="submit">
                 В корзину
@@ -194,8 +178,15 @@ import products from '@/data/products';
 import categories from '@/data/categories';
 import gotoPage from '@/helpers/gotoPage';
 import numberFormat from '@/helpers/numberFormat';
+import CounterProduct from '@/components/CounterProduct.vue';
 
 export default {
+  data() {
+    return {
+      productAmount: 1,
+    };
+  },
+  components: { CounterProduct },
   filters: {
     numberFormat,
   },
@@ -209,6 +200,12 @@ export default {
   },
   methods: {
     gotoPage,
+    addToCart() {
+      this.$store.commit(
+        'addProductToCart',
+        { productID: this.product.id, amount: this.productAmount },
+      );
+    },
   },
 };
 </script>
