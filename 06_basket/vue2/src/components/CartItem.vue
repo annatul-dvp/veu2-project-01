@@ -52,8 +52,6 @@ export default {
   computed: {
     amount: {
       get() {
-        console.log('get');
-        console.log(this.item.amount);
         return this.item.amount;
       },
       set(value) {

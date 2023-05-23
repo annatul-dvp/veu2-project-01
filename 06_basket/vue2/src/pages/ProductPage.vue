@@ -1,5 +1,8 @@
 <template>
-  <main class="content container">
+  <main class="content container" v-if="productLoading">Идёт загрузка товара...</main>
+  <main class="content container" v-else-if="!productData">Не удалось загрузить данные о товаре</main>
+  <main class="content container" v-else-if="productLoadingFailed">Не удалось загрузить данные о товаре</main>
+  <main class="content container" v-else>
     <div class="content__top">
       <ul class="breadcrumbs">
         <li class="breadcrumbs__item">
@@ -174,16 +177,21 @@
 </template>
 
 <script>
-import products from '@/data/products';
-import categories from '@/data/categories';
+import axios from 'axios';
 import gotoPage from '@/helpers/gotoPage';
 import numberFormat from '@/helpers/numberFormat';
 import CounterProduct from '@/components/CounterProduct.vue';
+import { API_BASE_URL } from '../config';
 
 export default {
   data() {
     return {
       productAmount: 1,
+
+      productData: null,
+
+      productLoading: false,
+      productLoadingFailed: false,
     };
   },
   components: { CounterProduct },
@@ -192,19 +200,38 @@ export default {
   },
   computed: {
     product() {
-      return products.find((product) => product.id === +this.$route.params.id);
+      return this.productData ? { ...this.productData, image: this.productData.image.file.url } : [];
     },
     category() {
-      return categories.find((category) => category.id === this.product.categoryId);
+      return this.productData.category;
     },
   },
   methods: {
+    loadProduct() {
+      this.productLoading = true;
+      this.productLoadingFailed = false;
+      clearTimeout(this.loadProductsTimer);
+      this.loadProductsTimer = setTimeout(() => {
+        axios.get(`${API_BASE_URL}/api/products/${this.$route.params.id}`)
+          .then((response) => { this.productData = response.data; })
+          .catch(() => { this.productLoadingFailed = true; })
+          .then(() => { this.productLoading = false; });
+      });
+    },
     gotoPage,
     addToCart() {
       this.$store.commit(
         'addProductToCart',
         { productID: this.product.id, amount: this.productAmount },
       );
+    },
+  },
+  watch: {
+    '$route.params.id': {
+      handler() {
+        this.loadProduct();
+      },
+      immediate: true,
     },
   },
 };

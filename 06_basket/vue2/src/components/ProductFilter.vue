@@ -152,7 +152,6 @@ export default {
   },
   methods: {
     submit() {
-      console.log(this.colorsData.items.find((c) => c.code === this.currentColor).id);
       this.$emit('update:priceFrom', this.currentPriceFrom);
       this.$emit('update:priceTo', this.currentPriceTo);
       this.$emit('update:categoryId', this.currentCategoryId);

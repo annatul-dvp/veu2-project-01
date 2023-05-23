@@ -13,6 +13,29 @@
     <ProductFilter :price-from.sync="filterPriceFrom" :price-to.sync="filterPriceTo"
     :category-id.sync="filterCategoryId" :colorId.sync="filterColorId"/>
     <section class="catalog">
+      <div v-if="productsLoading">
+        <svg xmlns:svg="http://www.w3.org/2000/svg" xmlns="http://www.w3.org/2000/svg"
+        xmlns:xlink="http://www.w3.org/1999/xlink" version="1.0" width="150px" height="38px"
+        viewBox="0 0 128 32" xml:space="preserve">
+          <rect x="0" y="0" width="100%" height="100%" fill="#FFFFFF" />
+          <circle fill="#000000" cx="0" cy="0" r="11" transform="translate(16 16)">
+            <animateTransform attributeName="transform" type="scale" additive="sum"
+            values="1;1.42;1;1;1;1;1;1;1;1" dur="1350ms" repeatCount="indefinite"></animateTransform>
+          </circle>
+          <circle fill="#000000" cx="0" cy="0" r="11" transform="translate(64 16)">
+            <animateTransform attributeName="transform" type="scale" additive="sum"
+            values="1;1;1;1;1.42;1;1;1;1;1" dur="1350ms" repeatCount="indefinite"></animateTransform>
+          </circle>
+          <circle fill="#000000" cx="0" cy="0" r="11" transform="translate(112 16)">
+            <animateTransform attributeName="transform" type="scale" additive="sum" values="1;1;1;1;1;1;1;1.42;1;1"
+            dur="1350ms" repeatCount="indefinite"></animateTransform>
+          </circle>
+        </svg>
+      </div>
+      <div v-if="productsLoadingFailed">
+        При загрузке товаров произошла ошибка.
+        <button @click="loadProducts">Попробовать ещё раз</button>
+      </div>
       <ProductList :products="products"/>
       <BasePagination v-model='page' :count="countProducts"
       :per-page="productPerPage"/>
@@ -43,6 +66,9 @@ export default {
       productPerPage: 3,
 
       productsData: null,
+
+      productsLoading: false,
+      productsLoadingFailed: false,
     };
   },
   computed: {
@@ -60,6 +86,8 @@ export default {
   },
   methods: {
     loadProducts() {
+      this.productsLoading = true;
+      this.productsLoadingFailed = false;
       clearTimeout(this.loadProductsTimer);
       this.loadProductsTimer = setTimeout(() => {
         axios.get(`${API_BASE_URL}/api/products`, {
@@ -72,8 +100,10 @@ export default {
             maxPrice: this.filterPriceTo,
           },
         })
-          .then((response) => { this.productsData = response.data; });
-      });
+          .then((response) => { this.productsData = response.data; })
+          .catch(() => { this.productsLoadingFailed = true; })
+          .then(() => { this.productsLoading = false; });
+      }, 5000);
     },
   },
   watch: {
