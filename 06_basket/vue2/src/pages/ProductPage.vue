@@ -99,12 +99,14 @@
             </fieldset>
 
             <div class="item__row">
-              <CounterProduct :product-amount.sync="productAmount"> </CounterProduct>
+              <CounterProduct :product-amount.sync="productAmount"  :page-type.sync="pageType"> </CounterProduct>
 
-              <button class="button button--primery" type="submit">
+              <button class="button button--primery" type="submit" :disabled="productAddSending">
                 В корзину
               </button>
             </div>
+            <div v-show="productAdded">Товар добавлен в корзину</div>
+            <div v-show="productAddSending">Добавляем товар в корзину...</div>
           </form>
         </div>
       </div>
@@ -181,17 +183,22 @@ import axios from 'axios';
 import gotoPage from '@/helpers/gotoPage';
 import numberFormat from '@/helpers/numberFormat';
 import CounterProduct from '@/components/CounterProduct.vue';
+import { mapActions } from 'vuex';
 import { API_BASE_URL } from '../config';
 
 export default {
   data() {
     return {
+      pageType: 'productPage',
       productAmount: 1,
 
       productData: null,
 
       productLoading: false,
       productLoadingFailed: false,
+
+      productAdded: false,
+      productAddSending: false,
     };
   },
   components: { CounterProduct },
@@ -207,6 +214,8 @@ export default {
     },
   },
   methods: {
+    ...mapActions(['addProductToCart']),
+
     loadProduct() {
       this.productLoading = true;
       this.productLoadingFailed = false;
@@ -220,10 +229,14 @@ export default {
     },
     gotoPage,
     addToCart() {
-      this.$store.commit(
-        'addProductToCart',
-        { productID: this.product.id, amount: this.productAmount },
-      );
+      this.productAdded = false;
+      this.productAddSending = true;
+
+      this.addProductToCart({ productID: this.product.id, amount: this.productAmount })
+        .then(() => {
+          this.productAdded = true;
+          this.productAddSending = false;
+        });
     },
   },
   watch: {

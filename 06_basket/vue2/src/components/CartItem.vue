@@ -11,30 +11,14 @@
       Артикул: {{ item.product.id }}
     </span>
 
-    <div class="product__counter form__counter">
-      <button type="button" aria-label="Убрать один товар">
-        <svg width="10" height="10" fill="currentColor">
-          <use xlink:href="#icon-minus"></use>
-        </svg>
-      </button>
-
-      <label>
-        <input type="text" v-model.number="amount" name="count">
-      </label>
-
-      <button type="button" aria-label="Добавить один товар">
-        <svg width="10" height="10" fill="currentColor">
-          <use xlink:href="#icon-plus"></use>
-        </svg>
-      </button>
-    </div>
+    <CounterProduct :product-amount.sync="amount"  :page-type.sync="pageType"> </CounterProduct>
 
     <b class="product__price">
       {{ (item.amount * item.product.price) | numberFormat }}
     </b>
 
     <button class="product__del button-del" type="button"
-    aria-label="Удалить товар из корзины" @click.prevent="deleteProduct(item.productID)">
+    aria-label="Удалить товар из корзины" @click.prevent="deleteProductFromCart">
       <svg width="20" height="20" fill="currentColor">
         <use xlink:href="#icon-close"></use>
       </svg>
@@ -45,22 +29,32 @@
 <script>
 import numberFormat from '@/helpers/numberFormat';
 import { mapMutations } from 'vuex';
+import CounterProduct from '@/components/CounterProduct.vue';
 
 export default {
   filters: { numberFormat },
+  data() {
+    return {
+      pageType: 'cartItem',
+    };
+  },
   props: ['item'],
+  components: { CounterProduct },
   computed: {
     amount: {
       get() {
         return this.item.amount;
       },
       set(value) {
-        this.$store.commit('updateCartProductAmount', { productID: this.item.productID, amount: value });
+        this.$store.dispatch('updateCartProductAmount', { productID: this.item.productID, amount: value });
       },
     },
   },
   methods: {
     ...mapMutations({ deleteProduct: 'deleteCartProduct' }),
+    deleteProductFromCart() {
+      this.$store.dispatch('deleteCartProduct', { productID: this.item.productID });
+    },
   },
 };
 </script>
