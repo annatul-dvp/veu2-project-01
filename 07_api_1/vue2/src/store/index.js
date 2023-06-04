@@ -13,6 +13,10 @@ export default new Vuex.Store({
     orderDeliveryPrice: 500,
   },
   mutations: {
+    resetCart(state) {
+      state.cartProducts = [];
+      state.cartProductsData = [];
+    },
     updateCartProductAmount(state, { productID, amount }) {
       const item = state.cartProducts.find((i) => i.productID === productID);
 
@@ -20,9 +24,6 @@ export default new Vuex.Store({
         item.amount = amount;
       }
     },
-    // deleteCartProduct(state, productID) {
-    //   state.cartProducts = state.cartProducts.filter((item) => item.productID !== productID);
-    // },
     updateUserAccessKey(state, accessKey) {
       state.userAccessKey = accessKey;
     },
@@ -53,6 +54,9 @@ export default new Vuex.Store({
       return getters.cartDetailProducts.reduce((acc, item) => (item.product.price * item.amount) + acc, 0);
     },
     orderTotalprice(state, getters) {
+      if (getters.cartDetailProducts.length === 0) {
+        return 0;
+      }
       return getters.cartDetailProducts.reduce((acc, item) => (item.product.price * item.amount) + acc, 0) + state.orderDeliveryPrice;
     },
     orderDeliveryPrice(state) {
