@@ -24,7 +24,7 @@
         Корзина
       </h1>
       <span class="content__info">
-        3 товара
+        {{ products.length }} товара
       </span>
     </div>
 
@@ -86,7 +86,7 @@
           </div>
         </div>
 
-        <div class="cart__block">
+        <!-- <div class="cart__block">
           <ul class="cart__orders">
             <OrderItem v-for="item in products" :key="item.productID" :item="item"/>
           </ul>
@@ -102,18 +102,25 @@
           <button class="cart__button button button--primery" type="submit">
             Оформить заказ
           </button>
-          <div v-if="orderIsLoading">
-            <svg xmlns:svg="http://www.w3.org/2000/svg" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.0"
-            width="12px" height="12px" viewBox="0 0 128 128" xml:space="preserve">
-              <path fill="#ffffff" d="M64.4 16a49 49 0 0 0-50 48 51 51 0 0 0 50 52.2 53 53 0 0 0 54-52c-.7-48-45-55.7-45-55.7s45.3 3.8 49 55.6c.8
-              32-24.8 59.5-58 60.2-33 .8-61.4-25.7-62-60C1.3 29.8 28.8.6 64.3 0c0 0 8.5 0 8.7 8.4 0 8-8.6 7.6-8.6 7.6z">
+        </div> -->
+
+        <OrderCartInfo page-type = "OrderPage" :products="products" :order-delivery-price="orderDeliveryPrice"
+        :order-amount-products="orderAmountProducts" :total-price="totalPrice"/>
+
+        <div v-if="orderIsLoading">
+          <svg xmlns:svg="http://www.w3.org/2000/svg" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.0"
+          width="12px" height="12px" viewBox="0 0 128 128" xml:space="preserve">
+            <path fill="#000000" d="M64.4 16a49 49 0 0 0-50 48 51 51 0 0 0 50
+            52.2 53 53 0 0 0 54-52c-.7-48-45-55.7-45-55.7s45.3 3.8 49 55.6c.8 32-24.8 59.5-58 60.2-33 .8-61.4-25.7-62-60C1.3 29.8 28.8.6 64.3 0c0
+            0 8.5 0 8.7 8.4 0 8-8.6 7.6-8.6 7.6z">
               <animateTransform attributeName="transform" type="rotate" from="0 64 64" to="360 64 64" dur="1800ms" repeatCount="indefinite">
-              </animateTransform></path>
-            </svg>
-            Оформляем заказ...
-          </div>
-          <div v-if="orderIsDone">Заказ оформлен</div>
+              </animateTransform>
+            </path>
+          </svg>
+          Оформляем заказ...
         </div>
+        <div v-if="orderIsDone">Заказ оформлен</div>
+
         <div class="cart__error form__error-block" v-if="formErrorMessage">
           <h4>Заявка не отправлена!</h4>
           <p>
@@ -131,12 +138,17 @@ import { mapGetters } from 'vuex';
 import numberFormat from '@/helpers/numberFormat';
 import BaseFormText from '@/components/BaseFormText.vue';
 import BaseFormTextArea from '@/components/BaseFormTextArea.vue';
-import OrderItem from '@/components/OrderItem.vue';
+// import OrderItem from '@/components/OrderItem.vue';
+import OrderCartInfo from '@/components/OrderCartInfo.vue';
 import { API_BASE_URL } from '../config';
 
 export default {
   filters: { numberFormat },
-  components: { BaseFormText, BaseFormTextArea, OrderItem },
+  components: {
+    BaseFormText,
+    BaseFormTextArea,
+    OrderCartInfo,
+  },
   data() {
     return {
       formData: {},
@@ -171,8 +183,10 @@ export default {
               userAccessKey: this.$store.state.userAccessKey,
             },
           })
-          .then(() => {
+          .then((response) => {
             this.$store.commit('resetCart');
+            this.$store.commit('updateOrderInfo', response.data);
+            this.$router.push({ name: 'orderInfo', params: { id: response.data.id } });
           })
           .catch((error) => {
             this.formError = error.response.data.error.request || {};

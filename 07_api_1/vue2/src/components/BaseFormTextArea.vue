@@ -1,7 +1,7 @@
 <!-- eslint-disable vuejs-accessibility/form-control-has-label -->
 <template>
   <BaseFormField :title="title" :error="error">
-    <textarea class="form__input form__input--area" v-model="dataValue" :type="type" :placeholder="placeholder"> </textarea>
+    <textarea class="form__input form__input--area" v-model="dataValue" :placeholder="placeholder"> </textarea>
   </BaseFormField>
 </template>
 

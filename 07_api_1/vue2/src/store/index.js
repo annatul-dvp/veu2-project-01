@@ -10,9 +10,13 @@ export default new Vuex.Store({
     cartProducts: [],
     userAccessKey: null,
     cartProductsData: [],
-    orderDeliveryPrice: 500,
+    orderDeliveryPrice: 0,
+    orderInfo: null,
   },
   mutations: {
+    updateOrderInfo(state, orderInfo) {
+      state.orderInfo = orderInfo;
+    },
     resetCart(state) {
       state.cartProducts = [];
       state.cartProductsData = [];
@@ -59,14 +63,45 @@ export default new Vuex.Store({
       }
       return getters.cartDetailProducts.reduce((acc, item) => (item.product.price * item.amount) + acc, 0) + state.orderDeliveryPrice;
     },
+    savedOrderTotalprice(state, getters) {
+      if (getters.savedOrderDetailProducts.length === 0) {
+        return 0;
+      }
+      return getters.savedOrderDetailProducts.reduce((acc, item) => (item.product.price * item.amount) + acc, 0) + state.orderDeliveryPrice;
+    },
     orderDeliveryPrice(state) {
       return state.orderDeliveryPrice;
     },
     orderAmountProducts(state, getters) {
       return getters.cartDetailProducts.reduce((acc, item) => item.amount + acc, 0);
     },
+    savedOrderDetailProducts(state) {
+      if (!state.orderInfo) {
+        return [];
+      }
+      return state.orderInfo.basket.items.map((item) => ({
+        product: {
+          productID: item.product.id,
+          image: item.product.image.file.url,
+          price: item.product.price,
+          title: item.product.title,
+        },
+        amount: item.quantity,
+      }));
+    },
   },
   actions: {
+    loadOrderInfo(context, orderId) {
+      return axios
+        .get(`${API_BASE_URL}/api/orders/${orderId}`, {
+          params: {
+            userAccessKey: context.state.userAccessKey,
+          },
+        })
+        .then((response) => {
+          context.commit('updateOrderInfo', response.data);
+        });
+    },
     loadCart(context) {
       return axios
         .get(`${API_BASE_URL}/api/baskets`, {
